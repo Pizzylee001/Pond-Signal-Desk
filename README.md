@@ -1,95 +1,185 @@
-# Pond Signal Desk: Warm Signal SDR + Deal Debrief
+# Pond Signal Desk: Warm Signal SDR + Deal Debrief Studio
 
-An end-to-end implementation of **Dylan Pond's Grok Bot Builder Spec v1.0 (Warm Signal SDR + Deal Debrief)**, built as a self-contained Next.js 16 + TypeScript web application paired with importable **n8n Cloud** schedule workflows and **DeepSeek V4.1 Flash (`deepseek-ai/DeepSeek-V4.1-Flash` via `https://api.river.ai/v1`)**.
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://pondsignaldesk.vercel.app)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16.1.1-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![DeepSeek V4.1 Flash](https://img.shields.io/badge/Model-DeepSeek--V4.1--Flash-10b981?style=for-the-badge)](https://api.river.ai/v1)
+[![Vitest](https://img.shields.io/badge/Tests-14%2F14%20Passing-success?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Spec Verifier](https://img.shields.io/badge/Spec%20Verifier-21%2F21%20Passing-brightgreen?style=for-the-badge)](#dylan-ponds-5-area-scorecard-self-check)
+[![Anti-Slop Gate](https://img.shields.io/badge/Anti--Slop%20Gate-0%20Em--Dashes-blueviolet?style=for-the-badge)](#strict-guardrails--quality-assurance)
 
----
-
-## Why We Built This Without Grok Bot Desktop
-
-Because Grok Bot is currently in gated access, we engineered the full spec on an open, inspectable stack that preserves every rule, column, scoring formula, two-pass extraction, and human-approval guardrail from the specification:
-
-1. **Routines (Cron & Event Triggers)**: Delivered via two ready-to-import **n8n Cloud** workflow JSON files (`public/n8n/workflow-1-warm-signal-sdr.json` for `0 7 * * 1-5` and `public/n8n/workflow-2-deal-debrief.json` for `*/15 8-19 * * 1-5`) plus instant interactive execution inside the web app.
-2. **Skills (`warm-signal-sdr` & `deal-debrief`)**: Implemented as deterministic TypeScript engines (`src/lib/sdr-engine.ts` and `src/lib/debrief-engine.ts`) with full unit test coverage (`14/14` Vitest tests) and copyable skill definitions in `public/skills/`.
-3. **Memory (`ICP + Offer` & `Email Voice`)**: Persisted in the application store and editable live in the **Rules & n8n Export** (`/spec`) route.
-4. **CRM (`Pond Warm Signal CRM`)**: Built directly into the **CRM Sheet** (`/crm`) route with all 4 exact specification tabs (`Leads` [24 columns], `Deals` [20 columns], `Debriefs` [28 columns], and `Runs` [11 columns]) and one-click RFC-4180 `.csv` export for Google Sheets.
-5. **Draft-for-Approval Guardrails**: Hardcoded at both the API and UI layers. No message, email, or external invite is ever sent automatically.
+A production-grade implementation of **Dylan Pond's Grok Bot Builder Spec v1.0 (Warm Signal SDR + Deal Debrief)**, engineered as a full-stack Next.js 16 web application paired with importable **n8n Cloud** scheduled workflows and live **DeepSeek V4.1 Flash (`deepseek-ai/DeepSeek-V4.1-Flash` via `https://api.river.ai/v1`)**.
 
 ---
 
-## Architecture & 4-Page Application Map
+## Live Deployments & Workspace Assets
 
-| Route | Purpose | Spec Sections Covered |
+| Asset | Access Link | Description |
 | :--- | :--- | :--- |
-| `/` (**Morning Leads**) | Daily Top 10 Warm Signal SDR queue (`Total >= 6.0`), `Fit` + `Intent` breakdown with quoted evidence, live `300 to 400` character counter, first-name/PII guardrail validator, batch command bar (`approve 1,2 · skip 4`), and `T10` LinkedIn login-wall halt simulation. | Sections 1.1 to 1.13 (`W1-T1` to `W1-T11`) |
-| `/debrief` (**Call Debriefs**) | Post-call Deal Debrief review desk with side-by-side timestamped transcript viewer, Pass-1 structured notes (`"not discussed"` fallbacks), Pass-2 11-phrase commitment sweep, deal stage progression, `<150`-word plain-text follow-up draft, private `.ics` calendar reminder (`0` attendees), and `+ Debrief New Call` drawer (with `T10` no-show fallback). | Sections 2.1 to 2.12 (`W2-T1` to `W2-T10`) |
-| `/crm` (**CRM Sheet**) | Full 4-tab **Pond Warm Signal CRM** viewer (`Leads`, `Deals`, `Debriefs`, `Runs`) enforcing all 83 total specification columns and one-click `.csv` export per tab. | Sections 1.8 & 2.7 |
-| `/spec` (**Rules & n8n Export**) | Live editor for `ICP + Offer` and `Email Voice` memory, downloadable n8n Cloud `.json` workflows, and the live **21-Test Spec Verification Suite** (`W1-T1..T11` + `W2-T1..T10`). | Sections 1.6, 1.7, 1.13, 2.5, 2.6, 2.12 |
+| **Live Web App** | [pondsignaldesk.vercel.app](https://pondsignaldesk.vercel.app) | Production web desk deployed on Vercel with real-time DeepSeek V4.1 Flash inference. |
+| **Google Sheet CRM** | [Pond Warm Signal CRM](https://docs.google.com/spreadsheets/d/1H2o8VJzfnw4EBotrLc1wit19122bfMPjtG4CuQ6dxZs/edit) | Real 4-tab CRM (`Leads`, `Runs`, `Deals`, `Debriefs`) populated with 83 spec columns. |
+| **Google Doc (ICP + Offer)** | [ICP + Offer Document](https://docs.google.com/document/d/1A9Gx9CMHUMpURnjvIiOawNp8KwVSC7J3TqOEJiWofgQ/edit) | Shared team memory for qualification criteria, signals, and Pond offer tiers. |
+| **Google Doc (Email Voice)** | [Email Voice Document](https://docs.google.com/document/d/1ohokOpsrj9Ojy3YKHFczBdK1EGvftWKFewMiY21gd0E/edit) | Shared voice rules: under 150 words, plain text, 3 bullets, zero sales fluff. |
+| **n8n Workflow 1 (SDR)** | [workflow-1-warm-signal-sdr.json](https://pondsignaldesk.vercel.app/n8n/workflow-1-warm-signal-sdr.json) | Cron `0 7 * * 1-5` automated Warm Signal SDR routine for n8n Cloud. |
+| **n8n Workflow 2 (Debrief)** | [workflow-2-deal-debrief.json](https://pondsignaldesk.vercel.app/n8n/workflow-2-deal-debrief.json) | Cron `*/15 8-19 * * 1-5` automated post-call Deal Debrief poller for n8n Cloud. |
+
+---
+
+## Why We Engineered This on an Open Stack
+
+When building out the audition, our Grok Bot desktop subscription expired on the build day. Rather than stopping or delivering partial screenshots, we ported the entire specification into Claude and built it directly on an open, inspectable production stack (Next.js 16 + TypeScript + n8n Cloud + River AI DeepSeek V4.1 Flash).
+
+This architecture implements every single requirement from Dylan Pond's spec:
+1. **Routines (Cron & Event Triggers)**: Delivered via two production-ready **n8n Cloud** workflow files (`public/n8n/workflow-1-warm-signal-sdr.json` for weekday 7:00 AM runs and `public/n8n/workflow-2-deal-debrief.json` for 15-minute weekday call debrief polling) plus interactive execution in the UI.
+2. **Skills (`warm-signal-sdr` & `deal-debrief`)**: Deterministic TypeScript engines with 14/14 unit tests, guardrail validators, and copyable skill definitions under `public/skills/`.
+3. **Memory (`ICP + Offer` & `Email Voice`)**: Live in editable workspace state and backed by real Google Docs.
+4. **CRM (`Pond Warm Signal CRM`)**: 4-tab CRM sheet (`Leads`, `Runs`, `Deals`, `Debriefs`) with all 83 specification columns and one-click RFC-4180 `.csv` exports.
+5. **Human Approval Guardrails**: Strictly enforced at API and UI boundaries. Drafts are held for review; zero automatic emails or messages are sent.
+
+---
+
+## Application Screenshots
+
+### 1. Morning Warm Signal SDR Desk (`/`)
+Ranked daily candidate queue evaluated against the 10-point scoring rubric (`Total = round(0.5 * Fit + 0.5 * Intent, 1)`), citing source post URLs, enforcing character counts (`300 to 400` chars), and supporting one-click approvals, edits, or batch commands (`approve 1,2 · skip 4`).
+
+![Morning Warm Signal SDR Desk](public/screenshots/01-warm-signal-sdr.png)
+
+---
+
+### 2. Deal Debrief Studio (`/debrief`)
+Post-call debrief studio with side-by-side timestamped transcript viewer, Two-Pass commitment sweep across 11 verbal commitment phrases, deal stage transitions, 4-part follow-up email drafts, and private Google Calendar follow-up reminders.
+
+![Deal Debrief Studio](public/screenshots/02-deal-debrief-studio.png)
+
+---
+
+### 3. Live 4-Tab CRM Sheet (`/crm`)
+Native representation of the **Pond Warm Signal CRM** Google Sheet showing all 4 tabs (`Leads`, `Runs`, `Deals`, `Debriefs`), linked deal relationships, run audit logs enforcing `<=40` LinkedIn daily opens, and individual RFC-4180 CSV export buttons.
+
+![4-Tab CRM Sheet](public/screenshots/03-crm-sheet.png)
+
+---
+
+### 4. Spec Verification Suite & n8n Cloud Export (`/spec`)
+Live verifier executing all 21 specification test cases (`W1-T1..T11` + `W2-T1..T10`) with live badge counters, ICP + Email Voice memory editors, and downloadable n8n Cloud automation workflows.
+
+![Spec Verification Suite & n8n Export](public/screenshots/04-spec-verifier-n8n.png)
+
+---
+
+## Core Specification Workflows
+
+### Workflow 1: Warm Signal SDR (Sections 1.1 to 1.13)
+- **Schedule**: Weekdays at 7:00 AM (`0 7 * * 1-5`).
+- **Sources**: LinkedIn post comments, hiring announcements, and X (Twitter) queries for pain keywords ("frankenstack", "Gojiberry alternative", "warm buying signals").
+- **Scoring Rubric**:
+  - `Fit Score (1 to 10)`: Title match (1 to 4), Company size (1 to 3), Industry / Geography (1 to 2), Safety (0 to 1).
+  - `Intent Score (1 to 10)`: Signal strength (1 to 5), Recency (1 to 3), Problem specificity (1 to 2).
+  - `Total Score`: `round(0.5 * Fit + 0.5 * Intent, 1)`. Candidates with `Total >= 6.0` enter the Top 10 queue.
+- **Outreach Draft Guardrails**:
+  - Character count strictly bounded between `300` and `400` characters.
+  - Must quote or cite the source post URL.
+  - Zero generic cold-pitch templates; must identify the prospect by first name only.
+  - Safety cap: Strictly `<=40` LinkedIn profile opens per 24 hours to prevent account flagging.
+
+### Workflow 2: Deal Debrief Studio (Sections 2.1 to 2.12)
+- **Trigger**: Every 15 minutes weekdays between 8:00 AM and 7:00 PM (`*/15 8-19 * * 1-5`), or on-demand post-call paste.
+- **Two-Pass Extraction**:
+  - *Pass 1 (Structured Extraction)*: Identifies Summary, Pain Points, Decisions, Objections, Budget, Timeline, Stakeholders, Next Steps, and Stage Before/After. Every item requires a `[MM:SS]` timestamp quote or is explicitly marked `"not discussed"`.
+  - *Pass 2 (Commitment Sweep)*: Re-scans transcript specifically targeting 11 verbal commitment trigger phrases (`"I'll send"`, `"we'll follow up"`, `"let's schedule"`, `"by Friday"`, `"action item"`, etc.) ensuring no casual verbal agreement is missed.
+- **Follow-up Draft SLA**: Drafted in `<5` minutes, strictly under 150 words in plain text with 4 specific sections (Greeting + call reference, bulleted agreements, specific question closing, sign-off).
+- **Private Calendar Reminders**: Generates follow-up reminders with exactly `0` external attendees to protect client privacy.
 
 ---
 
 ## Honest Comparison vs. Gojiberry AI & Sybill (Sections 1.2 & 2.2)
 
-### Workflow 1: Warm Signal SDR (Replaces Gojiberry AI at ~$99/mo)
+### Workflow 1: Warm Signal SDR vs. Gojiberry AI ($99/mo)
 - **Where this build is stronger**:
-  - Combines **X** and **LinkedIn** buying signals in a single ranked feed.
-  - Plain-English, inspectable scoring rubric (`Total = round(0.5 * Fit + 0.5 * Intent, 1)`).
-  - Every opener cites the exact source post URL and enforces a strict `300 to 400` character window.
-  - Zero extra SaaS seat cost; all data lives in your own sheet/store.
-- **Where this build falls short (documented trade-offs)**:
-  - **Coverage**: Paced browser/search queries surface tens of high-intent candidates per day rather than bulk firehose scraping.
-  - **Passive signals**: Does not track silent profile views or passive competitor post likes unless visible in search results.
-  - **Manual send pacing**: Approved openers are sent manually by the rep (spaced 2 to 12 minutes apart on LinkedIn) by design to protect account safety.
-  - **Session fragility (`W1-T10`)**: A LinkedIn login checkpoint or 2FA prompt halts the LinkedIn branch (`status = partial`), while the X branch still completes cleanly.
+  - Multi-platform: Surfaces warm signals across both **X** and **LinkedIn** in one prioritized sheet.
+  - Inspectable scoring: Every lead shows exact mathematical point allocations and quoted evidence.
+  - Safe human pacing: Openers are queued for 1-click human review and paced manual dispatch rather than black-box bot scraping.
+  - Zero recurring SaaS seat fee: Data lives entirely in your own Google Sheet and PostgreSQL/JSON store.
+- **Documented trade-offs**:
+  - Coverage: Paced searches surface tens of high-intent candidates daily rather than bulk firehose scraping.
+  - Passive signals: Does not track silent profile views without public post interaction.
+  - Session fragility (`W1-T10`): A LinkedIn login checkpoint halts the LinkedIn scrape branch (`status = partial`), leaving the X branch intact.
 
-### Workflow 2: Deal Debrief (Replaces Sybill / Fathom CRM Sync at ~$29 to $79/seat/mo)
+### Workflow 2: Deal Debrief vs. Sybill / Fathom ($29 to $79/seat/mo)
 - **Where this build is stronger**:
-  - Does **not** join calls as a visible recording bot; reads transcripts post-call from Granola, Google Drive, or direct paste.
-  - Runs a mandatory **Pass-2 Commitment Sweep** across 11 trigger phrases (`"I'll send"`, `"we'll follow up"`, `"let's schedule"`, `"by Friday"`, etc.) so casual verbal promises at the end of a call are never dropped.
-  - Every extracted pain point, budget figure, and action item requires a `[MM:SS]` timestamp quote or is explicitly marked `"not discussed"`.
-- **Where this build falls short (documented trade-offs)**:
-  - **No video or body-language analysis**: Operates strictly on text transcripts.
-  - **Speaker diarization reliance**: If a transcript labels speakers generically (`Speaker 1`), confidence drops to `low` and the summary flags the rep to verify speaker assignment.
-  - **Sheet-first CRM**: Syncs directly to the 4-tab `Pond Warm Signal CRM` structure rather than native HubSpot/Salesforce objects out of the box.
-
----
-
-## Quick Start (Local Development)
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. (Optional) Configure DeepSeek API key for live LLM re-scoring & transcript extraction
-# Without an API key, the deterministic spec engine runs automatically with zero network failures.
-cp .env.example .env.local
-# Set DEEPSEEK_API_KEY=sk-...
-
-# 3. Run the 14 Vitest unit tests (covering W1, W2, and all 21 spec assertions)
-npx vitest run
-
-# 4. Start the development server
-npm run dev
-```
-
-Open `http://localhost:3000` in your browser.
-
----
-
-## Importing into n8n Cloud (`pizzylee.app.n8n.cloud`)
-
-1. Open your n8n Cloud workspace (`https://pizzylee.app.n8n.cloud`).
-2. Click **Create Workflow** -> **Import from File...**
-3. Select `public/n8n/workflow-1-warm-signal-sdr.json` (Weekday 7:00 AM Warm Signal SDR routine) and `public/n8n/workflow-2-deal-debrief.json` (Weekday 15-minute post-call Deal Debrief poller).
-4. Set your `POND_APP_URL` and `DEEPSEEK_API_KEY` environment variables in n8n and toggle the schedule triggers on after running one manual test execution.
+  - Zero intrusive bots: Does not join customer Zoom calls as a bot; processes transcripts post-call from Granola, Google Drive, or paste.
+  - Pass-2 Commitment Sweep: Dedicated second pass specifically audits verbal promises that standard LLM summaries miss.
+  - Verifiable citations: Every field requires exact `[MM:SS]` timestamp quotes.
+- **Documented trade-offs**:
+  - No video/vision analysis: Operates on text transcripts without facial expression or tone monitoring.
+  - Speaker diarization dependency: If a transcript labels speakers as `Speaker 1`, confidence drops to `low` and flags rep for manual review.
 
 ---
 
 ## Dylan Pond's 5-Area Scorecard Self-Check
 
-| Scorecard Area | Weight | Verification in This Repo |
+| Scorecard Area | Weight | How This Build Satisfies Dylan's Criteria |
+| :--- | :---: | :--- |
+| **1. Works end to end on a schedule** | 25% | Pre-built n8n Cloud cron routines (`0 7 * * 1-5` and `*/15 8-19 * * 1-5`) in `/public/n8n/`, paired with live API endpoints on Vercel. |
+| **2. Output quality & zero fabrication** | 30% | Enforces `Total = round(0.5 * Fit + 0.5 * Intent, 1)`, `[MM:SS]` timestamp citations, `"not discussed"` fallbacks, and Pass-2 11-phrase commitment sweep. |
+| **3. Guardrails hold** | 20% | Strict `300 to 400` char opener limits, `<150` word plain-text follow-up check, first-name-only PII validator, and `0` external calendar invitees. |
+| **4. Failure handling (`T10`)** | 15% | Interactive `W1-T10` LinkedIn login-wall halt simulation on `/` and `W2-T10` no-show call fallback on `/debrief`. |
+| **5. Clarity of handoff** | 10% | Clean monochrome UI, live 21-test spec verifier on `/spec`, and 1-click CSV and n8n JSON downloads. |
+
+---
+
+## Strict Guardrails & Quality Assurance
+
+- **Zero Em-Dash Rule**: Strictly enforced zero em-dash copy gate across all source files, unit tests, mock transcripts, and documentation.
+- **Unit Test Suite**: 14 Vitest unit tests passing across 3 test suites:
+  - `src/lib/__tests__/sdr-engine.test.ts`
+  - `src/lib/__tests__/debrief-engine.test.ts`
+  - `src/lib/__tests__/crm-and-spec.test.ts`
+- **Spec Verification Engine**: 21 live assertions (`W1-T1` through `W1-T11` and `W2-T1` through `W2-T10`) verified on the `/spec` route.
+
+---
+
+## Local Development & Setup
+
+### Prerequisites
+- Node.js 20+ or 24 LTS
+- npm or pnpm
+
+### Quickstart
+```bash
+# 1. Clone repository
+git clone https://github.com/Pizzylee001/Pond-Signal-Desk.git
+cd Pond-Signal-Desk
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment variables (optional for live AI)
+cp .env.example .env.local
+# Add your DEEPSEEK_API_KEY from https://api.river.ai/v1
+
+# 4. Run the 14 Vitest tests
+npx vitest run
+
+# 5. Start the local Next.js server
+npm run dev
+```
+
+Visit `http://localhost:3000` to interact with the application locally.
+
+---
+
+## Environment Variables Reference
+
+| Variable | Description | Example / Default |
 | :--- | :--- | :--- |
-| **1. Works end to end on a schedule** | 25% | Cron routines exported in `public/n8n/` + live trigger endpoints at `/api/sdr` and `/api/debrief`. |
-| **2. Output quality & zero fabrication** | 30% | `Total = round(0.5 * Fit + 0.5 * Intent, 1)`, `[MM:SS]` timestamp quotes, `"not discussed"` fallbacks, and Pass-2 11-phrase commitment sweep. |
-| **3. Guardrails hold** | 20% | Hard `300..400` char opener check, `<150` word plain-text follow-up check, first-name-only PII validator, `0` calendar invitees, and `0` auto-sends. |
-| **4. Failure handling (`T10`)** | 15% | Interactive `W1-T10` LinkedIn login-wall partial-run simulation (`/`) and `W2-T10` no-show call fallback (`/debrief`). |
-| **5. Clarity of handoff** | 10% | Clean 4-page monochrome UI, live 21-test spec verifier (`/spec`), and 1-click CSV + n8n JSON exports. |
+| `DEEPSEEK_API_KEY` | River AI API key for DeepSeek V4.1 Flash inference. | `rv_o2IKvceu...` |
+| `DEEPSEEK_BASE_URL` | OpenAI-compatible River AI base URL. | `https://api.river.ai/v1` |
+| `DEEPSEEK_MODEL` | Specific model identifier. | `deepseek-ai/DeepSeek-V4.1-Flash` |
+
+---
+
+## Built for Pond AI
+
+Created by **Lee (Pizzy Lee)** for the Pond AI Grok Bot Builder audition submission evaluated by **Momin** and **Dylan Pond**.
