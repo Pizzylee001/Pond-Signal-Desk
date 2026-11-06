@@ -67,7 +67,7 @@ export async function generateOpenerWithDeepSeek(
       };
       const text = data.choices?.[0]?.message?.content?.trim().replace(/^["']|["']$/g, '');
       if (text) {
-        const cleaned = text.replace(/—/g, ',');
+        const cleaned = text.replace(/\u2014/g, ',');
         const check = validateOpenerDraft(cleaned, {
           first_name: candidate.first_name,
           last_name: candidate.last_name,

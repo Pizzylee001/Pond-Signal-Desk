@@ -94,7 +94,7 @@ describe('Workflow 2: Deal Debrief Engine (T1-T10 Spec Verification)', () => {
     expect(validCheck.valid).toBe(true);
     expect(validCheck.wordCount).toBeLessThan(150);
 
-    const badBody = `Hi Maya Lin — just checking in as per our conversation! Circle back at maya@latticeflow.com.`;
+    const badBody = `Hi Maya Lin \u2014 just checking in as per our conversation! Circle back at maya@latticeflow.com.`;
     const badCheck = validateFollowupEmail('Quick question', badBody, {
       attendeeLastName: 'Lin',
     });

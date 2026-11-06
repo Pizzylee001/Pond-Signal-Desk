@@ -188,7 +188,7 @@ describe('Workflow 1: Warm Signal SDR Engine (T1-T11 Spec Verification)', () => 
     expect(checkValid.flags).toHaveLength(0);
 
     const invalidWithLastNameAndEmDash =
-      'Hey Maya Lin — I came across your profile and loved your post! Can we hop on a quick 15-min call at https://calendly.com/pond? Email me at maya@latticeflow.com.';
+      'Hey Maya Lin \u2014 I came across your profile and loved your post! Can we hop on a quick 15-min call at https://calendly.com/pond? Email me at maya@latticeflow.com.';
     const checkInvalid = validateOpenerDraft(invalidWithLastNameAndEmDash, {
       first_name: 'Maya',
       last_name: 'Lin',

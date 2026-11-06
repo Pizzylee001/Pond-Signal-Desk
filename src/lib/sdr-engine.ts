@@ -265,7 +265,7 @@ export function validateOpenerDraft(
     flags.push('length');
   }
 
-  if (draft.includes('—') || draft.includes('--')) {
+  if (draft.includes('\u2014') || draft.includes('--')) {
     flags.push('em_dash');
   }
 
@@ -308,7 +308,7 @@ export function buildDeterministicOpener(candidate: CandidateInput): string {
   const channel = candidate.source === 'X' ? 'X' : 'LinkedIn';
   const snippet = candidate.signal_quote
     .replace(/["“”]/g, '')
-    .replace(/—/g, ',')
+    .replace(/\u2014/g, ',')
     .slice(0, 72)
     .trim();
 

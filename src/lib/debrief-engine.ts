@@ -205,7 +205,7 @@ export function validateFollowupEmail(
     flags.push('over_150_words');
   }
 
-  if (body.includes('—') || body.includes('--') || subject.includes('—')) {
+  if (body.includes('\u2014') || body.includes('--') || subject.includes('\u2014')) {
     flags.push('em_dash');
   }
 
