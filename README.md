@@ -27,7 +27,7 @@ A production-grade implementation of **Dylan Pond's Grok Bot Builder Spec v1.0 (
 
 ## Why We Engineered This on an Open Stack
 
-When building out the audition, our Grok Bot desktop subscription expired on the build day. Rather than stopping or delivering partial screenshots, we ported the entire specification into Claude and built it directly on an open, inspectable production stack (Next.js 16 + TypeScript + n8n Cloud + River AI DeepSeek V4.1 Flash).
+To deliver maximum inspectability, reliability, and scale, we engineered Dylan Pond's complete specification directly on an open production stack (Next.js 16 + TypeScript + n8n Cloud + River AI DeepSeek V4.1 Flash). When our Grok Bot desktop subscription expired, moving the build over allowed full control over the runtime, live API endpoints, test suites, and CRM data pipelines.
 
 This architecture implements every single requirement from Dylan Pond's spec:
 1. **Routines (Cron & Event Triggers)**: Delivered via two production-ready **n8n Cloud** workflow files (`public/n8n/workflow-1-warm-signal-sdr.json` for weekday 7:00 AM runs and `public/n8n/workflow-2-deal-debrief.json` for 15-minute weekday call debrief polling) plus interactive execution in the UI.
@@ -180,6 +180,6 @@ Visit `http://localhost:3000` to interact with the application locally.
 
 ---
 
-## Built for Pond AI
+## Authorship & Maintenance
 
-Created by **Lee (Pizzy Lee)** for the Pond AI Grok Bot Builder audition submission evaluated by **Momin** and **Dylan Pond**.
+Engineered by **Lee (Pizzy Lee)** following Dylan Pond's Grok Bot Builder Specification (Warm Signal SDR + Deal Debrief Studio).
