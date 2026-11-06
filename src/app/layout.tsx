@@ -24,12 +24,15 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'Pond Signal Desk · Warm Signal SDR & Deal Debrief',
   description:
-    'Daily X and LinkedIn buying-signal scorer, human-approved opener drafter, and 2-pass sales call debrief studio built for Pond AI.',
+    'Daily X and LinkedIn buying-signal scorer, human-approved opener drafter, and 2-pass sales call debrief studio.',
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '32x32', type: 'image/png' },
     ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 };
 
