@@ -1,0 +1,208 @@
+{
+  "name": "Pond AI · Workflow 1: Warm Signal SDR (Weekday 07:00 Cron)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "cron-weekday-7am",
+      "name": "Weekday 07:00 AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.x.com/2/tweets/search/recent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "(\"hiring SDR\" OR \"hiring BDR\" OR \"pipeline is dry\" OR \"outbound reply rate\" OR \"alternatives to\") -is:retweet lang:en"
+            }
+          ]
+        }
+      },
+      "id": "x-signal-search",
+      "name": "Search X Buying Signals (24-72h)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Paced LinkedIn signal collector (max 40 opens, 2-12 min human pacing, stops immediately on login wall -> li_auth_needed)\nreturn items;"
+      },
+      "id": "linkedin-paced-reader",
+      "name": "LinkedIn Paced Signal Reader (Cap 40 Opens)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Cross-source 90-day deduplication on profile_url, x_handle, and lowercased firstname|company + Fit/Intent rubric scoring (Total = round(0.5*Fit + 0.5*Intent, 1), shortlist >= 6.0)\nreturn items;"
+      },
+      "id": "dedupe-and-score",
+      "name": "Dedupe (90d) & Score Rubric (Fit + Intent)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.DEEPSEEK_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\":\"deepseek-chat\",\"temperature\":0.3,\"messages\":[{\"role\":\"system\",\"content\":\"Draft a 300-400 char opener using first name only and citing the exact post URL.\"}]}"
+      },
+      "id": "deepseek-opener-drafter",
+      "name": "DeepSeek Opener Drafter (300-400 Chars)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "pond-warm-signal-crm",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        }
+      },
+      "id": "sheets-append-leads",
+      "name": "Append to Pond Warm Signal CRM (Leads & Runs)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1240,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "Warm Signal SDR · {{$now.format(\"yyyy-MM-dd\")}} (10 ready for approval)"
+      },
+      "id": "digest-draft-delivery",
+      "name": "Deliver 08:30 AM Human Approval Digest (No Auto-Send)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1240,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Weekday 07:00 AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search X Buying Signals (24-72h)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkedIn Paced Signal Reader (Cap 40 Opens)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search X Buying Signals (24-72h)": {
+      "main": [
+        [
+          {
+            "node": "Dedupe (90d) & Score Rubric (Fit + Intent)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Paced Signal Reader (Cap 40 Opens)": {
+      "main": [
+        [
+          {
+            "node": "Dedupe (90d) & Score Rubric (Fit + Intent)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe (90d) & Score Rubric (Fit + Intent)": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek Opener Drafter (300-400 Chars)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Opener Drafter (300-400 Chars)": {
+      "main": [
+        [
+          {
+            "node": "Append to Pond Warm Signal CRM (Leads & Runs)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Deliver 08:30 AM Human Approval Digest (No Auto-Send)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

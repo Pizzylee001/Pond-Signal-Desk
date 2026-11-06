@@ -1,0 +1,202 @@
+{
+  "name": "Pond AI · Workflow 2: Deal Debrief (15m Poll + Post-Call Extraction)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 8-19 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "cron-15m-poll",
+      "name": "Weekday 15-Min Ended Call Poll",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "id"
+        }
+      },
+      "id": "gcal-ended-events",
+      "name": "Filter External Sales Calls & Dedupe event_id",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Locate transcript in Granola -> Google Drive Meet Notes -> Gmail recap. If missing after 20m, trigger T10 no-show fallback.\nreturn items;"
+      },
+      "id": "fetch-transcript",
+      "name": "Fetch Transcript (Granola / Drive / Gmail)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.DEEPSEEK_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\":\"deepseek-chat\",\"temperature\":0.1,\"messages\":[{\"role\":\"system\",\"content\":\"Pass 1: Extract 13 spec fields with verbatim timestamps; use not discussed if absent. Pass 2: Sweep for commitment phrases (I'll, we'll, let me, can you, send, follow up, next week, by Friday, loop in, check with, schedule).\"}]}"
+      },
+      "id": "deepseek-two-pass-extract",
+      "name": "DeepSeek 2-Pass Extraction & Commitment Sweep",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "pond-warm-signal-crm",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Deals",
+          "mode": "name"
+        }
+      },
+      "id": "sheets-upsert-deals-debriefs",
+      "name": "Upsert Deals & Append Debriefs Tab",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1220,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "id"
+        },
+        "summary": "=Follow up: {{$json.company}}: {{$json.next_step}}",
+        "additionalFields": {
+          "attendees": []
+        }
+      },
+      "id": "gcal-private-reminder",
+      "name": "Create Private Reminder (0 Invitees)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        1220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{$json.company}} + Pond: next steps",
+        "message": "={{$json.followup_body}}"
+      },
+      "id": "gmail-followup-draft",
+      "name": "Save <150w Gmail Follow-Up Draft (No Auto-Send)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1220,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Weekday 15-Min Ended Call Poll": {
+      "main": [
+        [
+          {
+            "node": "Filter External Sales Calls & Dedupe event_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter External Sales Calls & Dedupe event_id": {
+      "main": [
+        [
+          {
+            "node": "Fetch Transcript (Granola / Drive / Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Transcript (Granola / Drive / Gmail)": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek 2-Pass Extraction & Commitment Sweep",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek 2-Pass Extraction & Commitment Sweep": {
+      "main": [
+        [
+          {
+            "node": "Upsert Deals & Append Debriefs Tab",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Private Reminder (0 Invitees)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save <150w Gmail Follow-Up Draft (No Auto-Send)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
