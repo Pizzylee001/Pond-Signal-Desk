@@ -25,6 +25,12 @@ export const metadata: Metadata = {
   title: 'Pond Signal Desk · Warm Signal SDR & Deal Debrief',
   description:
     'Daily X and LinkedIn buying-signal scorer, human-approved opener drafter, and 2-pass sales call debrief studio built for Pond AI.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({

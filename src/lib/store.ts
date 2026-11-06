@@ -620,27 +620,55 @@ function createInitialStore(): CRMStoreData {
   };
 }
 
+const BUNDLED_STORE_PATH = path.join(process.cwd(), 'data', 'crm-store.json');
+const WRITABLE_STORE_PATH =
+  process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
+    ? path.join('/tmp', 'crm-store.json')
+    : BUNDLED_STORE_PATH;
+
+let memoryCache: CRMStoreData | null = null;
+
 export function readStore(): CRMStoreData {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    if (!fs.existsSync(STORE_PATH)) {
-      const seed = createInitialStore();
-      fs.writeFileSync(STORE_PATH, JSON.stringify(seed, null, 2), 'utf-8');
-      return seed;
-    }
-    const raw = fs.readFileSync(STORE_PATH, 'utf-8');
-    return JSON.parse(raw) as CRMStoreData;
-  } catch {
-    return createInitialStore();
+  if (memoryCache) {
+    return memoryCache;
   }
+  try {
+    if (fs.existsSync(WRITABLE_STORE_PATH)) {
+      const raw = fs.readFileSync(WRITABLE_STORE_PATH, 'utf-8');
+      memoryCache = JSON.parse(raw) as CRMStoreData;
+      return memoryCache;
+    }
+    if (fs.existsSync(BUNDLED_STORE_PATH)) {
+      const raw = fs.readFileSync(BUNDLED_STORE_PATH, 'utf-8');
+      memoryCache = JSON.parse(raw) as CRMStoreData;
+      try {
+        const dir = path.dirname(WRITABLE_STORE_PATH);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(WRITABLE_STORE_PATH, raw, 'utf-8');
+      } catch {
+        // Fallback to memory
+      }
+      return memoryCache;
+    }
+  } catch {
+    // Fallback below
+  }
+  memoryCache = createInitialStore();
+  return memoryCache;
 }
 
 export function writeStore(data: CRMStoreData): CRMStoreData {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  memoryCache = data;
+  try {
+    const dir = path.dirname(WRITABLE_STORE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(WRITABLE_STORE_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  } catch {
+    // If filesystem write fails on read-only environment, memoryCache preserves state
   }
-  fs.writeFileSync(STORE_PATH, JSON.stringify(data, null, 2), 'utf-8');
   return data;
 }
