@@ -1,6 +1,6 @@
 # Pond Signal Desk: Warm Signal SDR + Deal Debrief
 
-An end-to-end implementation of **Dylan Pond's Grok Bot Builder Spec v1.0 (Warm Signal SDR + Deal Debrief)**, built as a self-contained Next.js 16 + TypeScript web application paired with importable **n8n Cloud** schedule workflows and **DeepSeek V3 (`deepseek-chat`)** reasoning.
+An end-to-end implementation of **Dylan Pond's Grok Bot Builder Spec v1.0 (Warm Signal SDR + Deal Debrief)**, built as a self-contained Next.js 16 + TypeScript web application paired with importable **n8n Cloud** schedule workflows and **DeepSeek V4.1 Flash (`deepseek-ai/DeepSeek-V4.1-Flash` via `https://api.river.ai/v1`)**.
 
 ---
 

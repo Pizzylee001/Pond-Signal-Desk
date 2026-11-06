@@ -55,7 +55,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.deepseek.com/v1/chat/completions",
+        "url": "https://api.river.ai/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -67,10 +67,10 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "{\"model\":\"deepseek-chat\",\"temperature\":0.1,\"messages\":[{\"role\":\"system\",\"content\":\"Pass 1: Extract 13 spec fields with verbatim timestamps; use not discussed if absent. Pass 2: Sweep for commitment phrases (I'll, we'll, let me, can you, send, follow up, next week, by Friday, loop in, check with, schedule).\"}]}"
+        "jsonBody": "{\"model\":\"deepseek-ai/DeepSeek-V4.1-Flash\",\"temperature\":0.1,\"messages\":[{\"role\":\"system\",\"content\":\"Pass 1: Extract 13 spec fields with verbatim timestamps; use not discussed if absent. Pass 2: Sweep for commitment phrases (I'll, we'll, let me, can you, send, follow up, next week, by Friday, loop in, check with, schedule).\"}]}"
       },
       "id": "deepseek-two-pass-extract",
-      "name": "DeepSeek 2-Pass Extraction & Commitment Sweep",
+      "name": "DeepSeek V4.1 Flash 2-Pass Extraction & Commitment Sweep",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -167,14 +167,14 @@
       "main": [
         [
           {
-            "node": "DeepSeek 2-Pass Extraction & Commitment Sweep",
+            "node": "DeepSeek V4.1 Flash 2-Pass Extraction & Commitment Sweep",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "DeepSeek 2-Pass Extraction & Commitment Sweep": {
+    "DeepSeek V4.1 Flash 2-Pass Extraction & Commitment Sweep": {
       "main": [
         [
           {

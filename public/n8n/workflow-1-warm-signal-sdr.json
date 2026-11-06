@@ -73,7 +73,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.deepseek.com/v1/chat/completions",
+        "url": "https://api.river.ai/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -85,10 +85,10 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "{\"model\":\"deepseek-chat\",\"temperature\":0.3,\"messages\":[{\"role\":\"system\",\"content\":\"Draft a 300-400 char opener using first name only and citing the exact post URL.\"}]}"
+        "jsonBody": "{\"model\":\"deepseek-ai/DeepSeek-V4.1-Flash\",\"temperature\":0.3,\"messages\":[{\"role\":\"system\",\"content\":\"Draft a 300-400 char opener using first name only and citing the exact post URL.\"}]}"
       },
       "id": "deepseek-opener-drafter",
-      "name": "DeepSeek Opener Drafter (300-400 Chars)",
+      "name": "DeepSeek V4.1 Flash Opener Drafter (300-400 Chars)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -178,14 +178,14 @@
       "main": [
         [
           {
-            "node": "DeepSeek Opener Drafter (300-400 Chars)",
+            "node": "DeepSeek V4.1 Flash Opener Drafter (300-400 Chars)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "DeepSeek Opener Drafter (300-400 Chars)": {
+    "DeepSeek V4.1 Flash Opener Drafter (300-400 Chars)": {
       "main": [
         [
           {

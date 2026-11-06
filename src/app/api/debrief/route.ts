@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readStore, writeStore, type DealRow } from '@/lib/store';
-import {
-  runDealDebriefExtraction,
-  validateFollowupEmail,
-} from '@/lib/debrief-engine';
+import { validateFollowupEmail } from '@/lib/debrief-engine';
+import { extractDebriefWithDeepSeek } from '@/lib/deepseek';
 
 export async function GET() {
   const store = readStore();
@@ -59,7 +57,7 @@ export async function POST(request: Request) {
         existingDeal?.deal_id ||
         `DL-${callDate.replace(/-/g, '')}-${String(store.deals.length + 1).padStart(2, '0')}`;
 
-      const { debriefRow } = runDealDebriefExtraction({
+      const { debriefRow, usedModel, latencyMs, liveApiUsed } = await extractDebriefWithDeepSeek({
         event_id: `evt-manual-${Date.now()}`,
         deal_id: dealId,
         company: company.trim(),
@@ -110,12 +108,18 @@ export async function POST(request: Request) {
           last_call_date: callDate,
           calls_count: 1,
           risk_flags: debriefRow.risk_flags,
-          notes: `Created from Deal Debrief ${debriefRow.debrief_id}`,
+          notes: `Created from Deal Debrief ${debriefRow.debrief_id} (${usedModel}, ${latencyMs}ms)`,
         });
       }
 
       writeStore(store);
-      return NextResponse.json({ store, createdDebrief: debriefRow });
+      return NextResponse.json({
+        store,
+        createdDebrief: debriefRow,
+        usedModel,
+        latencyMs,
+        liveApiUsed,
+      });
     }
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });

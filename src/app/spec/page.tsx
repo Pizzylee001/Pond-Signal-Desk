@@ -176,7 +176,7 @@ export default function SpecAndN8nPage() {
                       workflow-1-warm-signal-sdr.json
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5 font-mono">
-                      Cron: 0 7 * * 1-5 &middot; 7 nodes &middot; DeepSeek V3
+                      Cron: 0 7 * * 1-5 &middot; 7 nodes &middot; DeepSeek V4.1 Flash (api.river.ai/v1)
                     </div>
                   </div>
                   <span className="text-xs font-medium underline shrink-0 ml-2">

@@ -323,7 +323,8 @@ export function runAll21SpecTests(store: CRMStoreData): {
   });
 
   // WORKFLOW 2 TESTS (T1 - T10)
-  const firstDebrief = store.debriefs[0];
+  const firstDebrief =
+    store.debriefs.find(d => d.debrief_id === 'DB-20261106-01') || store.debriefs[0];
   const sweepHits = sweepCommitmentPhrases(firstDebrief.transcript || '', 'Lee', 'Maya');
   wf2.push({
     id: 'W2-T1',
@@ -535,7 +536,7 @@ export function buildN8nWorkflow1Json() {
       {
         parameters: {
           method: 'POST',
-          url: 'https://api.deepseek.com/v1/chat/completions',
+          url: 'https://api.river.ai/v1/chat/completions',
           sendHeaders: true,
           headerParameters: {
             parameters: [{ name: 'Authorization', value: 'Bearer {{$env.DEEPSEEK_API_KEY}}' }],
@@ -543,10 +544,10 @@ export function buildN8nWorkflow1Json() {
           sendBody: true,
           specifyBody: 'json',
           jsonBody:
-            '{"model":"deepseek-chat","temperature":0.3,"messages":[{"role":"system","content":"Draft a 300-400 char opener using first name only and citing the exact post URL."}]}',
+            '{"model":"deepseek-ai/DeepSeek-V4.1-Flash","temperature":0.3,"messages":[{"role":"system","content":"Draft a 300-400 char opener using first name only and citing the exact post URL."}]}',
         },
         id: 'deepseek-opener-drafter',
-        name: 'DeepSeek Opener Drafter (300-400 Chars)',
+        name: 'DeepSeek V4.1 Flash Opener Drafter (300-400 Chars)',
         type: 'n8n-nodes-base.httpRequest',
         typeVersion: 4.2,
         position: [980, 300],
@@ -592,9 +593,9 @@ export function buildN8nWorkflow1Json() {
         main: [[{ node: 'Dedupe (90d) & Score Rubric (Fit + Intent)', type: 'main', index: 0 }]],
       },
       'Dedupe (90d) & Score Rubric (Fit + Intent)': {
-        main: [[{ node: 'DeepSeek Opener Drafter (300-400 Chars)', type: 'main', index: 0 }]],
+        main: [[{ node: 'DeepSeek V4.1 Flash Opener Drafter (300-400 Chars)', type: 'main', index: 0 }]],
       },
-      'DeepSeek Opener Drafter (300-400 Chars)': {
+      'DeepSeek V4.1 Flash Opener Drafter (300-400 Chars)': {
         main: [
           [
             { node: 'Append to Pond Warm Signal CRM (Leads & Runs)', type: 'main', index: 0 },
@@ -648,7 +649,7 @@ export function buildN8nWorkflow2Json() {
       {
         parameters: {
           method: 'POST',
-          url: 'https://api.deepseek.com/v1/chat/completions',
+          url: 'https://api.river.ai/v1/chat/completions',
           sendHeaders: true,
           headerParameters: {
             parameters: [{ name: 'Authorization', value: 'Bearer {{$env.DEEPSEEK_API_KEY}}' }],
@@ -656,10 +657,10 @@ export function buildN8nWorkflow2Json() {
           sendBody: true,
           specifyBody: 'json',
           jsonBody:
-            '{"model":"deepseek-chat","temperature":0.1,"messages":[{"role":"system","content":"Pass 1: Extract 13 spec fields with verbatim timestamps; use not discussed if absent. Pass 2: Sweep for commitment phrases (I\'ll, we\'ll, let me, can you, send, follow up, next week, by Friday, loop in, check with, schedule)."}]}',
+            '{"model":"deepseek-ai/DeepSeek-V4.1-Flash","temperature":0.1,"messages":[{"role":"system","content":"Pass 1: Extract 13 spec fields with verbatim timestamps; use not discussed if absent. Pass 2: Sweep for commitment phrases (I\'ll, we\'ll, let me, can you, send, follow up, next week, by Friday, loop in, check with, schedule)."}]}',
         },
         id: 'deepseek-two-pass-extract',
-        name: 'DeepSeek 2-Pass Extraction & Commitment Sweep',
+        name: 'DeepSeek V4.1 Flash 2-Pass Extraction & Commitment Sweep',
         type: 'n8n-nodes-base.httpRequest',
         typeVersion: 4.2,
         position: [960, 300],
@@ -711,9 +712,9 @@ export function buildN8nWorkflow2Json() {
         main: [[{ node: 'Fetch Transcript (Granola / Drive / Gmail)', type: 'main', index: 0 }]],
       },
       'Fetch Transcript (Granola / Drive / Gmail)': {
-        main: [[{ node: 'DeepSeek 2-Pass Extraction & Commitment Sweep', type: 'main', index: 0 }]],
+        main: [[{ node: 'DeepSeek V4.1 Flash 2-Pass Extraction & Commitment Sweep', type: 'main', index: 0 }]],
       },
-      'DeepSeek 2-Pass Extraction & Commitment Sweep': {
+      'DeepSeek V4.1 Flash 2-Pass Extraction & Commitment Sweep': {
         main: [
           [
             { node: 'Upsert Deals & Append Debriefs Tab', type: 'main', index: 0 },
